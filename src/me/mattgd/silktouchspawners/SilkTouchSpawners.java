@@ -3,9 +3,12 @@ package me.mattgd.silktouchspawners;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.entity.Player;
@@ -84,7 +87,8 @@ public class SilkTouchSpawners extends JavaPlugin implements Listener {
  		final Player p = e.getPlayer();
  		final Block b = e.getBlock();
  		
- 		if (b.getType().equals(Material.MOB_SPAWNER) && p.hasPermission("silktouchspawners.use")) {
+ 		if (b.getType().equals(Material.MOB_SPAWNER) && p.hasPermission("silktouchspawners.use") 
+ 				&& p.getGameMode().equals(GameMode.SURVIVAL)) {
  			if (confirm && confirmations.contains(p.getName())) {
  				confirmations.remove(p.getName());
  				return;
@@ -96,6 +100,9 @@ public class SilkTouchSpawners extends JavaPlugin implements Listener {
  				if (cost > 0) {
  					EconomyResponse r = econ.withdrawPlayer((OfflinePlayer) p, cost);
  					if (r.transactionSuccess()) {
+ 						final short entityID = getSpawnerEntityId(b);
+ 						ItemStack spawner = createNewSpawnerItem(entityID);
+ 						p.getWorld().dropItemNaturally(b.getLocation(), spawner);
  						b.breakNaturally();
  					} else if (confirm) {
 						confirmations.add(p.getName());
@@ -108,5 +115,23 @@ public class SilkTouchSpawners extends JavaPlugin implements Listener {
  			}
  		}
  	}
+ 	
+ 	private ItemStack createNewSpawnerItem(final short entityID) {
+        ItemStack item = new ItemStack(Material.MOB_SPAWNER, 1, entityID);
+        item.setDurability(entityID);
+        item.addUnsafeEnchantment(Enchantment.SILK_TOUCH, entityID);
+        return item;
+    }
+ 	
+ 	@SuppressWarnings("deprecation")
+	private short getSpawnerEntityId(final Block b) {
+        BlockState blockState = b.getState();
+        if (!(blockState instanceof CreatureSpawner)) {
+            throw new IllegalArgumentException("getSpawnerEntityId called on non-spawner block: " + b);
+        }
+
+        CreatureSpawner spawner = ((CreatureSpawner) blockState);
+        return spawner.getSpawnedType().getTypeId();
+    }
     
 }
