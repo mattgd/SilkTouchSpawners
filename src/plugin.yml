@@ -1,0 +1,11 @@
+name: SilkTouchSpawners
+version: 1.0
+main: net.minesofcode.silktouchspawners.SilkTouchSpawners
+author: mattgd
+description: A plugin for allowing players to use Silk Touch on mob spawners.
+depend: [Vault]
+
+permissions:
+   silktouchspawners.use:
+      description: Allows players to use Silk Touch on mob spawners
+      default: true

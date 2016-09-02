@@ -84,7 +84,7 @@ public class SilkTouchSpawners extends JavaPlugin implements Listener {
  		final Player p = e.getPlayer();
  		final Block b = e.getBlock();
  		
- 		if (b.getType().equals(Material.MOB_SPAWNER)) {
+ 		if (b.getType().equals(Material.MOB_SPAWNER) && p.hasPermission("silktouchspawners.use")) {
  			if (confirm && confirmations.contains(p.getName())) {
  				confirmations.remove(p.getName());
  				return;
