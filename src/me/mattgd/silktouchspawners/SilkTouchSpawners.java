@@ -95,15 +95,13 @@ public class SilkTouchSpawners extends JavaPlugin implements Listener {
  			}
  			
  			ItemStack tool = p.getInventory().getItemInMainHand();
- 			if (PICKAXES.contains(p.getInventory().getItemInMainHand())
+ 			if (PICKAXES.contains(tool.getType())
  					&& tool.containsEnchantment(SILK_TOUCH)) {
+ 				
  				if (cost > 0) {
  					EconomyResponse r = econ.withdrawPlayer((OfflinePlayer) p, cost);
  					if (r.transactionSuccess()) {
- 						final short entityID = getSpawnerEntityId(b);
- 						ItemStack spawner = createNewSpawnerItem(entityID);
- 						p.getWorld().dropItemNaturally(b.getLocation(), spawner);
- 						b.breakNaturally();
+ 						giveSpawner(p, b);
  					} else if (confirm) {
 						confirmations.add(p.getName());
  						p.sendMessage("You have insufficient funds to"
@@ -111,15 +109,23 @@ public class SilkTouchSpawners extends JavaPlugin implements Listener {
  								+ "\nBreak the spawner again if you'd like"
  								+ "to destroy it.");
  					}
+ 				} else {
+ 					giveSpawner(p, b);
  				}
  			}
  		}
  	}
  	
+ 	private void giveSpawner(Player p, Block b) {
+ 		final short entityID = getSpawnerEntityId(b);
+		ItemStack spawner = createNewSpawnerItem(entityID);
+		p.getWorld().dropItemNaturally(b.getLocation(), spawner);
+		b.breakNaturally();
+ 	}
+ 	
  	private ItemStack createNewSpawnerItem(final short entityID) {
         ItemStack item = new ItemStack(Material.MOB_SPAWNER, 1, entityID);
         item.setDurability(entityID);
-        item.addUnsafeEnchantment(Enchantment.SILK_TOUCH, entityID);
         return item;
     }
  	
